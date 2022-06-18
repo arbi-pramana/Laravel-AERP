@@ -21,8 +21,10 @@ class Transaction{
         $transaction->save();
     }
 
-    public function destroy($id)
+    public function destroy($id,$category)
     {
-        ModelsTransaction::where('payment_id',$id)->delete();
+        ModelsTransaction::where('payment_id',$id)
+            ->where('category',$category)
+            ->delete();
     }
 }

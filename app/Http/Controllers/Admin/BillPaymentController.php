@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Utility\Status;
+use App\Utility\Transaction;
 use Exception;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -524,6 +525,7 @@ class BillPaymentController extends Controller
         if ($res) {
             event(new BreadDataDeleted($dataType, $data));
         }
+        Transaction::destroy($id);
         Status::purchaseBill($request->bill_id);
         return redirect("admin/bills/".$request->bill_id)->with($data);
     }

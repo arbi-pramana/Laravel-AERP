@@ -544,7 +544,7 @@ class InvoicePaymentController extends Controller
         if ($res) {
             event(new BreadDataDeleted($dataType, $data));
         }
-        Transaction::destroy($id);
+        Transaction::destroy($id,"Invoice");
         Status::salesInvoice($request->invoice_id);
         return redirect('admin/invoices'."/".$request->invoice_id)->with($data);
     }

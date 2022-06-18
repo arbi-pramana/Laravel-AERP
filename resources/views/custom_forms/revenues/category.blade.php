@@ -3,7 +3,6 @@ use App\Models\Category;
 $url = request()->segment(count(request()->segments()));
 $id = request()->segment(3);
 $categories = Category::where('type',2)->get();
-$categoryFind = Category::find($id);
 @endphp
 
 @if($url == "create")
@@ -15,7 +14,7 @@ $categoryFind = Category::find($id);
 @elseif($url == "edit")
 <select name="category_id" class="form-control select2" required>
     @foreach($categories as $category)
-        <option @if($category->id == $categoryFind->id) selected="selected" @endif value="{{$category->id}}">{{$category->name}}</option>
+        <option @if($category->id == $dataTypeContent->id) selected="selected" @endif value="{{$category->id}}">{{$category->name}}</option>
     @endforeach
 </select>
 @else

@@ -363,7 +363,7 @@ class RevenueController extends Controller
             });
         $original_data = clone($data);
 
-        Transaction::destroy($data->id);
+        Transaction::destroy($data->id,"Income");
         $transaction_stores = [
             "user_id" => $request->customer_id,
             "user_type" => "Customer",
@@ -553,7 +553,7 @@ class RevenueController extends Controller
             event(new BreadDataDeleted($dataType, $data));
         }
 
-        Transaction::destroy($id);
+        Transaction::destroy($id,"Income");
 
         return redirect()->route("voyager.{$dataType->slug}.index")->with($data);
     }
