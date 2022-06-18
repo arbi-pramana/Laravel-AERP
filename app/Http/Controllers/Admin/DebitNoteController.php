@@ -15,10 +15,10 @@ use TCG\Voyager\Events\BreadDataRestored;
 use TCG\Voyager\Events\BreadDataUpdated;
 use TCG\Voyager\Events\BreadImagesDeleted;
 use TCG\Voyager\Facades\Voyager;
-use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 use TCG\Voyager\Http\Controllers\Controller;
+use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 
-class CreditNoteController extends Controller
+class DebitNoteController extends Controller
 {
     use BreadRelationshipParser;
 
@@ -368,11 +368,10 @@ class CreditNoteController extends Controller
         $this->deleteBreadImages($original_data, $to_remove);
 
         event(new BreadDataUpdated($dataType, $data));
-
-        Status::salesInvoice($data->invoice_id);
+        Status::purchaseBill($data->bill_id);
 
         if (auth()->user()->can('browse', app($dataType->model_name))) {
-            $redirect = redirect('admin/invoices/'.$data->invoice_id);
+            $redirect = redirect("admin/bills/".$data->bill_id);
         } else {
             $redirect = redirect()->back();
         }
@@ -452,11 +451,10 @@ class CreditNoteController extends Controller
         $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
 
         event(new BreadDataAdded($dataType, $data));
-        Status::salesInvoice($data->invoice_id);
-
+        Status::purchaseBill($data->bill_id);
         if (!$request->has('_tagging')) {
             if (auth()->user()->can('browse', $data)) {
-                $redirect = redirect('admin/invoices/'.$data->invoice_id);
+                $redirect = redirect("admin/bills/".$data->bill_id);
             } else {
                 $redirect = redirect()->back();
             }
@@ -487,7 +485,6 @@ class CreditNoteController extends Controller
         $slug = $this->getSlug($request);
 
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
-
         // Init array of IDs
         $ids = [];
         if (empty($id)) {
@@ -497,21 +494,24 @@ class CreditNoteController extends Controller
             // Single item delete, get ID from URL
             $ids[] = $id;
         }
+
         foreach ($ids as $id) {
             $data = call_user_func([$dataType->model_name, 'findOrFail'], $id);
+
             // Check permission
             $this->authorize('delete', $data);
-
+    
             $model = app($dataType->model_name);
             if (!($model && in_array(SoftDeletes::class, class_uses_recursive($model)))) {
                 $this->cleanup($dataType, $data);
             }
+
         }
 
         $displayName = count($ids) > 1 ? $dataType->getTranslatedAttribute('display_name_plural') : $dataType->getTranslatedAttribute('display_name_singular');
-
+        
         $res = $data->destroy($ids);
-        Status::salesInvoice($data->invoice->id);
+        Status::purchaseBill($data->bill->id);
         $data = $res
             ? [
                 'message'    => __('voyager::generic.successfully_deleted')." {$displayName}",

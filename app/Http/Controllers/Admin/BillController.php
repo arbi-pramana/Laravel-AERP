@@ -8,11 +8,21 @@ use App\Models\BillPayment;
 use App\Models\BillProduct;
 use App\Models\DebitNote;
 use App\Models\Transaction;
+use App\Utility\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class BillController extends Controller
 {
+    public function json(Request $request)
+    {
+        if(!empty($request->id)){
+            return Bill::with(['vendor','category'])->find($request->id);
+        } else {
+            return Bill::get();
+        }
+    }
+
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -123,5 +133,16 @@ class BillController extends Controller
     public function destroyProduct($id)
     {
         BillProduct::where('bill_id',$id)->delete();
+    }
+
+    public function destroyDebitNote($id)
+    {
+        $debit_note = DebitNote::find($id);
+        $debit_note->delete();
+        Status::purchaseBill($debit_note->bill_id);
+        return redirect()->back()->with([
+            'message'    => "Debit note deleted successfully",
+            'alert-type' => 'success',
+        ]);
     }
 }

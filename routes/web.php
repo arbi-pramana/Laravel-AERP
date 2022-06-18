@@ -26,6 +26,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('chart-of-accounts/sub-type.json',ChartOfAccountController::class.'@subTypeJson');
     Route::get('products.json',ProductController::class.'@json');
     Route::get('invoices.json',InvoiceController::class.'@json');
+    Route::get('bills.json',BillController::class.'@json');
     Route::post('invoices/store',InvoiceController::class.'@store');
     Route::put('invoices/{id}/update',InvoiceController::class.'@update');
     Route::get('invoices/{id}/update-status',InvoiceController::class.'@updateStatus');
@@ -33,6 +34,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('bills/store',BillController::class.'@store');
     Route::put('bills/{id}/update',BillController::class.'@update');
     Route::get('bills/{id}/update-status',BillController::class.'@updateStatus');
+    Route::delete('bills/{id}/debit-note',BillController::class.'@destroyDebitNote');
     Voyager::routes();
     Route::delete('invoices/{id}',InvoiceController::class.'@destroy')->name('voyager.invoices.destroy');
     Route::delete('bills/{id}',BillController::class.'@destroy')->name('voyager.bills.destroy');

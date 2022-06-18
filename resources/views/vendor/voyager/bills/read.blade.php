@@ -23,7 +23,7 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
         <i class="{{ $dataType->icon }}"></i> {{ __('voyager::generic.viewing') }} {{ ucfirst($dataType->getTranslatedAttribute('display_name_singular')) }} &nbsp;
         @if($bill->status==0)
         <a href="{{url('admin/bills/'.$bill->id.'/update-status?status=1')}}" class="btn btn-success" style="margin-right:20px;padding:7px">
-            <i class="glyphicon glyphicon-check"></i> <span>Approve</span>
+            <i class="glyphicon glyphicon-check"></i> <span>Sent</span>
         </a>
         @elseif($bill->status==1)
         <a href="{{url('admin/bills/'.$bill->id.'/update-status?status=0')}}" class="btn btn-warning" style="padding:7px">
@@ -77,7 +77,7 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
                         @elseif($bill->status == 2)
                         <span class="badge badge-primary">Partially Paid</span>
                         @elseif($bill->status == 1)
-                            <span class="badge badge-info">Approved</span>
+                            <span class="badge badge-info">Sent</span>
                         @else
                             <span class="badge badge-danger">Draft</span>
                         @endif
@@ -386,7 +386,7 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
     <script>
         function deleteDebitNote(id){
             $("#delete_debit_note_modal").modal('show');
-            $("#delete_debit_note").attr('action', "{{url('admin/bills')}}"+"/"+id+"/Debit-note");
+            $("#delete_debit_note").attr('action', "{{url('admin/bills')}}"+"/"+id+"/debit-note");
         }
     </script>
 
