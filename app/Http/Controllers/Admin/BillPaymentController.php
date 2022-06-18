@@ -460,6 +460,20 @@ class BillPaymentController extends Controller
 
         event(new BreadDataAdded($dataType, $data));
         
+        $transaction_stores = [
+            "user_id" => Bill::find($request->bill_id)->vendor_id,
+            "user_type" => "Vendor",
+            "account" => $request->account_id,
+            "type" => "Partial",
+            "amount" => $request->amount,
+            "description" => $request->description,
+            "date" => $request->date,
+            "created_by" => Auth::user()->id,
+            "payment_id" => $data->id,
+            "category" => "Bill",
+        ];
+        Transaction::store($transaction_stores);
+
         Status::purchaseBill($request->bill_id);
 
         if (!$request->has('_tagging')) {
@@ -533,7 +547,7 @@ class BillPaymentController extends Controller
         if ($res) {
             event(new BreadDataDeleted($dataType, $data));
         }
-        Transaction::destroy($id);
+        Transaction::destroy($id,"Bill");
         Status::purchaseBill($request->bill_id);
         return redirect("admin/bills/".$request->bill_id)->with($data);
     }
