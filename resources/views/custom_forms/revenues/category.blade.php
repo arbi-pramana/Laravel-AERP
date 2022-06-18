@@ -1,10 +1,3 @@
-@php
-use App\Models\Category;
-$url = request()->segment(count(request()->segments()));
-$id = request()->segment(3);
-$categories = Category::where('type',2)->get();
-@endphp
-
 @if($url == "create")
 <select name="category_id" class="form-control select2" required>
     @foreach($categories as $category)

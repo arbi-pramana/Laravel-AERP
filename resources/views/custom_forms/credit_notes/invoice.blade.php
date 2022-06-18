@@ -1,11 +1,3 @@
-@php
-$url = request()->segment(count(request()->segments()));
-$id = request()->segment(3);
-$inv_prefix = App\Models\Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
-$credit_note = App\Models\CreditNote::with('invoice')->find($id);
-$invoices = App\Models\Invoice::get();
-@endphp
-
 @if($url == "create")
 <select name="invoice_id" id="invoice_id" class="form-control select2" onchange="changeInvoice()" required>
     <option value="">--Select Invoice--</option>

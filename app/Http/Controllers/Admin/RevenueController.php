@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\BankAccount;
 use App\Models\Category;
 use App\Utility\Transaction;
 use TCG\Voyager\Http\Controllers\Controller;
@@ -185,8 +186,10 @@ class RevenueController extends Controller
         if (view()->exists("voyager::$slug.browse")) {
             $view = "voyager::$slug.browse";
         }
-
+        
+        $url = "browse";
         return Voyager::view($view, compact(
+            'url',
             'actions',
             'dataType',
             'dataTypeContent',
@@ -266,7 +269,9 @@ class RevenueController extends Controller
             $view = "voyager::$slug.read";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'isSoftDeleted'));
+        $url = "read";
+
+        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable', 'isSoftDeleted'));
     }
 
     //***************************************
@@ -326,7 +331,10 @@ class RevenueController extends Controller
             $view = "voyager::$slug.edit-add";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        $url = "edit";
+        $bank_accounts = BankAccount::get();
+        $categories = Category::where('type',2)->get();
+        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable','bank_accounts','categories'));
     }
 
     // POST BR(E)AD
@@ -442,7 +450,11 @@ class RevenueController extends Controller
             $view = "voyager::$slug.edit-add";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        $url = "create";
+        $bank_accounts = BankAccount::get();
+        $categories = Category::where('type',2)->get();
+
+        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable','bank_accounts','categories'));
     }
 
     /**

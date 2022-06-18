@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\CreditNote;
+use App\Models\Invoice;
+use App\Models\Setting;
 use App\Utility\Status;
 use Exception;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -185,23 +188,11 @@ class CreditNoteController extends Controller
             $view = "voyager::$slug.browse";
         }
 
-        return Voyager::view($view, compact(
-            'actions',
-            'dataType',
-            'dataTypeContent',
-            'isModelTranslatable',
-            'search',
-            'orderBy',
-            'orderColumn',
-            'sortableColumns',
-            'sortOrder',
-            'searchNames',
-            'isServerSide',
-            'defaultSearchKey',
-            'usesSoftDeletes',
-            'showSoftDeleted',
-            'showCheckboxColumn'
-        ));
+        $url = "browse";
+        $inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
+
+
+        return Voyager::view($view, compact('url','inv_prefix','actions','dataType','dataTypeContent','isModelTranslatable','search','orderBy','orderColumn','sortableColumns','sortOrder','searchNames','isServerSide','defaultSearchKey','usesSoftDeletes','showSoftDeleted','showCheckboxColumn'));
     }
 
     //***************************************
@@ -265,7 +256,12 @@ class CreditNoteController extends Controller
             $view = "voyager::$slug.read";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'isSoftDeleted'));
+        $url = "read";
+        $inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
+        $invoices = Invoice::get();
+        $credit_note = CreditNote::with('invoice')->find($dataTypeContent->id);
+
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'isSoftDeleted','url','inv_prefix','invoices','credit_note'));
     }
 
     //***************************************
@@ -325,7 +321,12 @@ class CreditNoteController extends Controller
             $view = "voyager::$slug.edit-add";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        $url = "edit";
+        $inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
+        $invoices = Invoice::get();
+        $credit_note = CreditNote::with('invoice')->find($dataTypeContent->id);
+
+        return Voyager::view($view, compact('url','inv_prefix','dataType', 'dataTypeContent', 'isModelTranslatable','invoices','credit_note'));
     }
 
     // POST BR(E)AD
@@ -428,7 +429,11 @@ class CreditNoteController extends Controller
             $view = "voyager::$slug.edit-add";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        $url = "create";
+        $inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
+        $credit_note = CreditNote::with('invoice')->find($dataTypeContent->id);
+        $invoices = Invoice::get();
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable','url', 'inv_prefix', 'credit_note', 'invoices'));
     }
 
     /**

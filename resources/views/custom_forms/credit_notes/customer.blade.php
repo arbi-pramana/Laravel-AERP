@@ -1,9 +1,3 @@
-@php
-$url = request()->segment(count(request()->segments()));
-$id = request()->segment(3);
-$credit_note = App\Models\CreditNote::with('customer')->find($id);
-@endphp
-
 <div id="customer_id">
 @if($url == "create")
 @elseif($url == "edit")

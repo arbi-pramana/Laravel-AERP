@@ -1,19 +1,3 @@
-@php
-use App\Models\Customer;
-use App\Models\Category;
-use App\Models\Invoice;
-use App\Models\InvoiceProduct;
-use App\Models\Setting;
-use App\Models\Product;
-use App\Utility\Formatting;
-
-$invoice = Invoice::find(Request::segment(3));
-$invoice_products = InvoiceProduct::where('invoice_id',Request::segment(3))->get();
-$inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
-$invoice_payments = App\Models\InvoicePayment::where('invoice_id',$invoice->id)->get();
-$credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
-@endphp
-
 @extends('voyager::master')
 
 @section('page_title', __('voyager::generic.view').' '.$dataType->getTranslatedAttribute('display_name_singular'))
@@ -98,11 +82,11 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                     <div class="row">
                         <div class="col-md-6">
                             <b> Issue Date </b><br>
-                            {{Formatting::date($invoice->issue_date)}}
+                            {{App\Utility\Formatting::date($invoice->issue_date)}}
                         </div>
                         <div class="col-md-6">
                             <b> Due Date </b><br>
-                            {{Formatting::date($invoice->due_date)}}
+                            {{App\Utility\Formatting::date($invoice->due_date)}}
                         </div>
                     </div>
                     <div class="row">
@@ -154,16 +138,16 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                             {{$invoice_product->quantity}}
                         </td>
                         <td>
-                            {{Formatting::price($invoice_product->price)}}
+                            {{App\Utility\Formatting::price($invoice_product->price)}}
                         </td>
                         <td>
                             {{$invoice_product->tax}}
                         </td>
                         <td>
-                            {{Formatting::price($invoice_product->discount)}}
+                            {{App\Utility\Formatting::price($invoice_product->discount)}}
                         </td>
                         <td>
-                            {{Formatting::price($amount)}}
+                            {{App\Utility\Formatting::price($amount)}}
                             <input type="hidden" class="taxes" id="tax_total_{{$i}}" value="{{$tax[$i]}}">
                             <input type="hidden" class="subtotals" id="subtotal_{{$i}}" value="{{$subtotals[$i]}}">
                         </td>
@@ -181,42 +165,42 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                         <td colspan="4"></td>
                         <td><b>Sub Total</b></td>
                         <td>
-                            {{Formatting::price(array_sum($subtotals))}}
+                            {{App\Utility\Formatting::price(array_sum($subtotals))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Discount</b></td>
                         <td>
-                            {{Formatting::price($invoice_products->sum('discount'))}}
+                            {{App\Utility\Formatting::price($invoice_products->sum('discount'))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Tax</b></td>
                         <td>
-                            {{Formatting::price(array_sum($tax))}}
+                            {{App\Utility\Formatting::price(array_sum($tax))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Paid</b></td>
                         <td>
-                            {{Formatting::price($invoice_payments->sum('amount'))}}
+                            {{App\Utility\Formatting::price($invoice_payments->sum('amount'))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Credit Note</b></td>
                         <td>
-                            {{Formatting::price($credit_notes->sum('amount'))}}
+                            {{App\Utility\Formatting::price($credit_notes->sum('amount'))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Total Amount</b></td>
                         <td>
-                            {{Formatting::price(array_sum($amounts)-$credit_notes->sum('amount')-$invoice_payments->sum('amount'))}}
+                            {{App\Utility\Formatting::price(array_sum($amounts)-$credit_notes->sum('amount')-$invoice_payments->sum('amount'))}}
                         </td>
                     </tr>
                 </tbody>
@@ -251,8 +235,8 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                                 <a href="{{url('storage/'.$receipt[0]->download_link)}}" download>{{$receipt[0]->original_name}}</a>
                             @endif
                         </td>
-                        <td>{{Formatting::date($invoice_payment->date)}}</td>
-                        <td>{{Formatting::price($invoice_payment->amount)}}</td>
+                        <td>{{App\Utility\Formatting::date($invoice_payment->date)}}</td>
+                        <td>{{App\Utility\Formatting::price($invoice_payment->amount)}}</td>
                         <td>{{$invoice_payment->account->bank_name}}</td>
                         <td>{{$invoice_payment->reference}}</td>
                         <td>{{$invoice_payment->description}}</td>
@@ -280,8 +264,8 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                 <tbody>
                     @foreach($credit_notes as $credit_note)
                     <tr>
-                        <td>{{Formatting::date($credit_note->date)}}</td>
-                        <td>{{Formatting::price($credit_note->amount)}}</td>
+                        <td>{{App\Utility\Formatting::date($credit_note->date)}}</td>
+                        <td>{{App\Utility\Formatting::price($credit_note->amount)}}</td>
                         <td>{{$credit_note->description}}</td>
                         <td>
                             <a href="{{url('admin/credit-notes/'.$credit_note->id.'/edit')}}" class="btn btn-sm btn-primary" target="_blank"><i class="voyager-edit"></i></a>

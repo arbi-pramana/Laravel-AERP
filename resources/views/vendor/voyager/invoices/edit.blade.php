@@ -1,19 +1,3 @@
-@php
-use App\Models\Customer;
-use App\Models\Category;
-use App\Models\Invoice;
-use App\Models\InvoiceProduct;
-use App\Models\Setting;
-use App\Models\Product;
-
-$invoice = Invoice::find(Request::segment(3));
-$invoice_products = InvoiceProduct::where('invoice_id',Request::segment(3))->get();
-$customers = Customer::get();
-$categories = Category::where('type',2)->get();
-$c_invoices = Invoice::get()->count()+1;
-$inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
-$products = Product::get();
-@endphp
 <div class="page-content edit-add container-fluid">
     <form action="update" method="post">
         @csrf
