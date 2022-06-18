@@ -1,17 +1,17 @@
 @php
-use App\Models\Customer;
+use App\Models\Vendor;
 use App\Models\Category;
-use App\Models\Invoice;
-use App\Models\InvoiceProduct;
+use App\Models\Bill;
+use App\Models\BillProduct;
 use App\Models\Setting;
 use App\Models\Product;
 use App\Utility\Formatting;
 
-$invoice = Invoice::find(Request::segment(3));
-$invoice_products = InvoiceProduct::where('invoice_id',Request::segment(3))->get();
-$inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
-$invoice_payments = App\Models\InvoicePayment::where('invoice_id',$invoice->id)->get();
-$credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
+$bill = Bill::find(Request::segment(3));
+$bill_products = BillProduct::where('bill_id',Request::segment(3))->get();
+$bill_prefix = Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
+$bill_payments = App\Models\BillPayment::where('bill_id',$bill->id)->get();
+$debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
 @endphp
 
 @extends('voyager::master')
@@ -21,12 +21,12 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
 @section('page_header')
     <h1 class="page-title">
         <i class="{{ $dataType->icon }}"></i> {{ __('voyager::generic.viewing') }} {{ ucfirst($dataType->getTranslatedAttribute('display_name_singular')) }} &nbsp;
-        @if($invoice->status==0)
-        <a href="{{url('admin/invoices/'.$invoice->id.'/update-status?status=1')}}" class="btn btn-success" style="margin-right:20px;padding:7px">
+        @if($bill->status==0)
+        <a href="{{url('admin/bills/'.$bill->id.'/update-status?status=1')}}" class="btn btn-success" style="margin-right:20px;padding:7px">
             <i class="glyphicon glyphicon-check"></i> <span>Approve</span>
         </a>
-        @elseif($invoice->status==1)
-        <a href="{{url('admin/invoices/'.$invoice->id.'/update-status?status=0')}}" class="btn btn-warning" style="padding:7px">
+        @elseif($bill->status==1)
+        <a href="{{url('admin/bills/'.$bill->id.'/update-status?status=0')}}" class="btn btn-warning" style="padding:7px">
             <i class="voyager-alarm-clock"></i> <span>Draft</span>
         </a>
         @else
@@ -65,31 +65,31 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                    <div class="row">
                     <div class="col-md-6">
                         <b>Billed To</b> <br>
-                        {{$invoice->customer->name}} <br>
-                        {{$invoice->customer->contact}} <br>
-                        {{$invoice->customer->billing_country}} <br>
-                        {{$invoice->customer->billing_zip}} <br>
-                        {{$invoice->customer->billing_address}} <br>
+                        {{$bill->vendor->name}} <br>
+                        {{$bill->vendor->contact}} <br>
+                        {{$bill->vendor->billing_country}} <br>
+                        {{$bill->vendor->billing_zip}} <br>
+                        {{$bill->vendor->billing_address}} <br>
                         <br><br>
                         <b>Status : </b> <br>
-                        @if($invoice->status == 3)
+                        @if($bill->status == 3)
                             <span class="badge badge-success">Paid</span>
-                        @elseif($invoice->status == 2)
+                        @elseif($bill->status == 2)
                         <span class="badge badge-primary">Partially Paid</span>
-                        @elseif($invoice->status == 1)
+                        @elseif($bill->status == 1)
                             <span class="badge badge-info">Approved</span>
                         @else
                             <span class="badge badge-danger">Draft</span>
                         @endif
                     </div>
-                    @if($invoice->shipping_display == 1)
+                    @if($bill->shipping_display == 1)
                         <div class="col-md-6">
                             <b>Shipped To</b> <br>
-                            {{$invoice->customer->shipping_name}} <br>
-                            {{$invoice->customer->shipping_phone}} <br>
-                            {{$invoice->customer->shipping_country}} <br>
-                            {{$invoice->customer->shipping_zip}} <br>
-                            {{$invoice->customer->shipping_address}} <br>
+                            {{$bill->vendor->shipping_name}} <br>
+                            {{$bill->vendor->shipping_phone}} <br>
+                            {{$bill->vendor->shipping_country}} <br>
+                            {{$bill->vendor->shipping_zip}} <br>
+                            {{$bill->vendor->shipping_address}} <br>
                         </div>
                     @endif
                    </div>
@@ -98,27 +98,27 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                     <div class="row">
                         <div class="col-md-6">
                             <b> Issue Date </b><br>
-                            {{Formatting::date($invoice->issue_date)}}
+                            {{Formatting::date($bill->issue_date)}}
                         </div>
                         <div class="col-md-6">
                             <b> Due Date </b><br>
-                            {{Formatting::date($invoice->due_date)}}
+                            {{Formatting::date($bill->due_date)}}
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <b> Invoice Number </b><br>
-                            {{$inv_prefix.str_pad($invoice->id,5,0,STR_PAD_LEFT)}}
+                            {{$bill_prefix.str_pad($bill->id,5,0,STR_PAD_LEFT)}}
                         </div>
                         <div class="col-md-6">
                             <b> Category </b><br>
-                            {{$invoice->category->name}}
+                            {{$bill->category->name}}
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <b> Ref Number </b><br>
-                            {{$invoice->ref_number}}
+                            {{$bill->ref_number}}
                         </div>
                     </div>
                 </div>        
@@ -139,28 +139,28 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                     <th>AMOUNT</th>
                 </thead>
                 <tbody id="appendTr">
-                    @foreach($invoice_products as $i => $invoice_product)
+                    @foreach($bill_products as $i => $bill_product)
                     @php
-                        $amount = ($invoice_product->quantity*$invoice_product->price) + ((($invoice_product->quantity*$invoice_product->price)*$invoice_product->tax)/100) - $invoice_product->discount;
-                        $tax[] = (($invoice_product->quantity*$invoice_product->price)*$invoice_product->tax)/100;
-                        $amounts[] = ($invoice_product->quantity*$invoice_product->price) + ((($invoice_product->quantity*$invoice_product->price)*$invoice_product->tax)/100) - $invoice_product->discount;
-                        $subtotals[] = $invoice_product->quantity*$invoice_product->price;
+                        $amount = ($bill_product->quantity*$bill_product->price) + ((($bill_product->quantity*$bill_product->price)*$bill_product->tax)/100) - $bill_product->discount;
+                        $tax[] = (($bill_product->quantity*$bill_product->price)*$bill_product->tax)/100;
+                        $amounts[] = ($bill_product->quantity*$bill_product->price) + ((($bill_product->quantity*$bill_product->price)*$bill_product->tax)/100) - $bill_product->discount;
+                        $subtotals[] = $bill_product->quantity*$bill_product->price;
                     @endphp
                     <tr id="tr_{{$i}}">
                         <td>
-                            {{$invoice_product->product->name}}
+                            {{$bill_product->product->name}}
                         </td>
                         <td>
-                            {{$invoice_product->quantity}}
+                            {{$bill_product->quantity}}
                         </td>
                         <td>
-                            {{Formatting::price($invoice_product->price)}}
+                            {{Formatting::price($bill_product->price)}}
                         </td>
                         <td>
-                            {{$invoice_product->tax}}
+                            {{$bill_product->tax}}
                         </td>
                         <td>
-                            {{Formatting::price($invoice_product->discount)}}
+                            {{Formatting::price($bill_product->discount)}}
                         </td>
                         <td>
                             {{Formatting::price($amount)}}
@@ -171,7 +171,7 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                     </tr>
                     <tr>
                         <td id="trtextarea_{{$i}}" colspan="2">
-                            <textarea name="description[]" id="description_{{$i}}" class="form-control" cols="30" rows="2" readonly>{{$invoice_product->description}}</textarea>
+                            <textarea name="description[]" id="description_{{$i}}" class="form-control" cols="30" rows="2" readonly>{{$bill_product->description}}</textarea>
                         </td>
                     </tr>
                     @endforeach
@@ -188,7 +188,7 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                         <td colspan="4"></td>
                         <td><b>Discount</b></td>
                         <td>
-                            {{Formatting::price($invoice_products->sum('discount'))}}
+                            {{Formatting::price($bill_products->sum('discount'))}}
                         </td>
                     </tr>
                     <tr>
@@ -202,21 +202,21 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                         <td colspan="4"></td>
                         <td><b>Paid</b></td>
                         <td>
-                            {{Formatting::price($invoice_payments->sum('amount'))}}
+                            {{Formatting::price($bill_payments->sum('amount'))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
-                        <td><b>Credit Note</b></td>
+                        <td><b>Debit Note</b></td>
                         <td>
-                            {{Formatting::price($credit_notes->sum('amount'))}}
+                            {{Formatting::price($debit_notes->sum('amount'))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Total Amount</b></td>
                         <td>
-                            {{Formatting::price(array_sum($amounts)-$credit_notes->sum('amount')-$invoice_payments->sum('amount'))}}
+                            {{Formatting::price(array_sum($amounts)-$debit_notes->sum('amount')-$bill_payments->sum('amount'))}}
                         </td>
                     </tr>
                 </tbody>
@@ -225,7 +225,7 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
     </div>
     <div class="row">
         <div class="col-md-12">
-            <h4 style="margin-top:30px;">Receipt Summary <a href="{{url('admin/invoice-payments/create?invoice_id='.$invoice->id)}}" class="btn btn-sm btn-success" style="float:right;" target="_blank"><i class="voyager-plus"></i> Make Payment</a></h4>
+            <h4 style="margin-top:30px;">Payment Summary <a href="{{url('admin/bill-payments/create?bill_id='.$bill->id)}}" class="btn btn-sm btn-success" style="float:right;" target="_blank"><i class="voyager-plus"></i> Make Payment</a></h4>
         </div>
     </div>
     <div class="card">
@@ -241,22 +241,22 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                     <th></th>
                 </thead>
                 <tbody>
-                    @foreach($invoice_payments as $invoice_payment)
+                    @foreach($bill_payments as $bill_payment)
                     <tr>
                         @php
-                            $receipt = json_decode($invoice_payment->add_receipt);
+                            $receipt = json_decode($bill_payment->add_receipt);
                         @endphp
                         <td>
                             @if(!empty($receipt))
                                 <a href="{{url('storage/'.$receipt[0]->download_link)}}" download>{{$receipt[0]->original_name}}</a>
                             @endif
                         </td>
-                        <td>{{Formatting::date($invoice_payment->date)}}</td>
-                        <td>{{Formatting::price($invoice_payment->amount)}}</td>
-                        <td>{{$invoice_payment->account->bank_name}}</td>
-                        <td>{{$invoice_payment->reference}}</td>
-                        <td>{{$invoice_payment->description}}</td>
-                        <td><a class="btn btn-sm btn-danger" onclick="deletePayment('{{$invoice_payment->id}}')" data-id="{{$invoice_payment->id}}"><i class="voyager-trash"></i> </label></td>
+                        <td>{{Formatting::date($bill_payment->date)}}</td>
+                        <td>{{Formatting::price($bill_payment->amount)}}</td>
+                        <td>{{$bill_payment->account->bank_name}}</td>
+                        <td>{{$bill_payment->reference}}</td>
+                        <td>{{$bill_payment->description}}</td>
+                        <td><a class="btn btn-sm btn-danger" onclick="deletePayment('{{$bill_payment->id}}')" data-id="{{$bill_payment->id}}"><i class="voyager-trash"></i> </label></td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -265,7 +265,7 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
     </div>
     <div class="row">
         <div class="col-md-12">
-            <h4 style="margin-top:30px;">Credit Note Summary <a href="{{url('admin/credit-notes/create')}}" class="btn btn-sm btn-success" style="float:right;" target="_blank"><i class="voyager-plus"></i> Add Credit Note</a></h4>
+            <h4 style="margin-top:30px;">Debit Note Summary <a href="{{url('admin/debit-notes/create')}}" class="btn btn-sm btn-success" style="float:right;" target="_blank"><i class="voyager-plus"></i> Add Debit Note</a></h4>
         </div>
     </div>
     <div class="card">
@@ -278,14 +278,14 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
                     <th></th>
                 </thead>
                 <tbody>
-                    @foreach($credit_notes as $credit_note)
+                    @foreach($debit_notes as $debit_note)
                     <tr>
-                        <td>{{Formatting::date($credit_note->date)}}</td>
-                        <td>{{Formatting::price($credit_note->amount)}}</td>
-                        <td>{{$credit_note->description}}</td>
+                        <td>{{Formatting::date($debit_note->date)}}</td>
+                        <td>{{Formatting::price($debit_note->amount)}}</td>
+                        <td>{{$debit_note->description}}</td>
                         <td>
-                            <a href="{{url('admin/credit-notes/'.$credit_note->id.'/edit')}}" class="btn btn-sm btn-primary" target="_blank"><i class="voyager-edit"></i></a>
-                            <a class="btn btn-sm btn-danger" onclick="deleteCreditNote('{{$credit_note->id}}')" data-id="{{$credit_note->id}}"><i class="voyager-trash"></i></a>
+                            <a href="{{url('admin/debit-notes/'.$debit_note->id.'/edit')}}" class="btn btn-sm btn-primary" target="_blank"><i class="voyager-edit"></i></a>
+                            <a class="btn btn-sm btn-danger" onclick="deleteDebitNote('{{$debit_note->id}}')" data-id="{{$debit_note->id}}"><i class="voyager-trash"></i></a>
                         </td>
                     </tr>
                     @endforeach
@@ -316,19 +316,19 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
 
-    <div class="modal modal-danger fade" tabindex="-1" id="delete_credit_note_modal" role="dialog">
+    <div class="modal modal-danger fade" tabindex="-1" id="delete_debit_note_modal" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ __('voyager::generic.close') }}"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title"><i class="voyager-trash"></i>  Are you sure you want to delete this credit note ?</h4>
+                    <h4 class="modal-title"><i class="voyager-trash"></i>  Are you sure you want to delete this Debit note ?</h4>
                 </div>
                 <div class="modal-footer">
-                    <form action="" id="delete_credit_note" method="POST">
+                    <form action="" id="delete_debit_note" method="POST">
                         {{ method_field('DELETE') }}
                         {{ csrf_field() }}
                         <input type="submit" class="btn btn-danger pull-right delete-confirm"
-                               value="Delete Credit Note">
+                               value="Delete Debit Note">
                     </form>
                     <button type="button" class="btn btn-default pull-right" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
                 </div>
@@ -384,16 +384,16 @@ $credit_notes = App\Models\CreditNote::where('invoice_id',$invoice->id)->get();
 
     </script>
     <script>
-        function deleteCreditNote(id){
-            $("#delete_credit_note_modal").modal('show');
-            $("#delete_credit_note").attr('action', "{{url('admin/invoices')}}"+"/"+id+"/credit-note");
+        function deleteDebitNote(id){
+            $("#delete_debit_note_modal").modal('show');
+            $("#delete_debit_note").attr('action', "{{url('admin/bills')}}"+"/"+id+"/Debit-note");
         }
     </script>
 
 <script>
         function deletePayment(id){
             $("#delete_payment_modal").modal('show');
-            $("#delete_payment").attr('action', "{{url('admin/invoice-payments')}}"+"/"+id+"?invoice_id="+'{{$invoice->id}}');
+            $("#delete_payment").attr('action', "{{url('admin/invoice-payments')}}"+"/"+id+"?bill_id="+'{{$bill->id}}');
         }
     </script>
 @stop

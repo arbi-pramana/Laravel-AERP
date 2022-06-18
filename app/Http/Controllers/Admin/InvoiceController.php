@@ -50,7 +50,12 @@ class InvoiceController extends Controller
                 $invoice_product->save();
             }
             DB::commit();
-            return redirect('admin/invoices');
+            return redirect('admin/invoices')->with(
+                [
+                    'message'    => "Invoice created successfully",
+                    'alert-type' => 'success',
+                ]
+            );
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
@@ -85,7 +90,10 @@ class InvoiceController extends Controller
                 $invoice_product->save();
             }
             DB::commit();
-            return redirect('admin/invoices');
+            return redirect('admin/invoices')->with( [
+                'message'    => "Invoice updated successfully",
+                'alert-type' => 'success',
+            ]);
         } catch (\Throwable $th) {
             DB::rollBack();
             dd($th);
