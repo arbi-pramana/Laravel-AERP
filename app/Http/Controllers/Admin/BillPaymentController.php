@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\BankAccount;
+use App\Models\Bill;
+use App\Models\Setting;
 use App\Utility\Status;
 use App\Utility\Transaction;
 use Exception;
@@ -427,7 +430,12 @@ class BillPaymentController extends Controller
             $view = "voyager::$slug.edit-add";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        $url = "create";
+        $bank_accounts = BankAccount::get();
+        $bill_prefix = Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
+        $bill = Bill::find(request('bill_id'));
+
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'bank_accounts', 'url', 'bill_prefix', 'bill'));
     }
 
     /**

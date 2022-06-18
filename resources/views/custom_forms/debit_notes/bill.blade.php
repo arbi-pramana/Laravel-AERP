@@ -1,11 +1,3 @@
-@php
-$url = request()->segment(count(request()->segments()));
-$id = request()->segment(3);
-$bill_prefix = App\Models\Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
-$debit_note = App\Models\DebitNote::with('bill')->find($id);
-$bills = App\Models\Bill::get();
-@endphp
-
 @if($url == "create")
 <select name="bill_id" id="bill_id" class="form-control select2" onchange="changeBill()" required>
     <option value="">--Select Bill--</option>

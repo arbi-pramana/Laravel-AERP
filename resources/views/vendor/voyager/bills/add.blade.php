@@ -1,16 +1,3 @@
-@php
-use App\Models\Vendor;
-use App\Models\Category;
-use App\Models\Bill;
-use App\Models\Setting;
-use App\Models\Product;
-
-$vendors = Vendor::get();
-$categories = Category::where('type',3)->get();
-$c_bills = Bill::get()->count()+1;
-$bill_prefix = Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
-$products = Product::get();
-@endphp
 <div class="page-content edit-add container-fluid">
     <form action="store" method="post">
         @csrf

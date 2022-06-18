@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\BankAccount;
 use App\Models\Invoice;
+use App\Models\Setting;
 use App\Models\Transaction as ModelsTransaction;
 use App\Utility\Status;
 use App\Utility\Transaction;
@@ -429,7 +431,12 @@ class InvoicePaymentController extends Controller
             $view = "voyager::$slug.edit-add";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        $url = "create";
+        $bank_accounts = BankAccount::get();
+        $inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
+        $invoice = Invoice::find(request('invoice_id'));
+
+        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable','bank_accounts','inv_prefix','invoice'));
     }
 
     /**

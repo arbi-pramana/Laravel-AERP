@@ -1,19 +1,3 @@
-@php
-use App\Models\Vendor;
-use App\Models\Category;
-use App\Models\Bill;
-use App\Models\BillProduct;
-use App\Models\Setting;
-use App\Models\Product;
-
-$bill = Bill::find(Request::segment(3));
-$bill_products = BillProduct::where('bill_id',Request::segment(3))->get();
-$vendors = Vendor::get();
-$categories = Category::where('type',3)->get();
-$c_invoices = Bill::get()->count()+1;
-$inv_prefix = Setting::where('key','system-setting.invoice_prefix')->first()->value ?? '';
-$products = Product::get();
-@endphp
 <div class="page-content edit-add container-fluid">
     <form action="update" method="post">
         @csrf

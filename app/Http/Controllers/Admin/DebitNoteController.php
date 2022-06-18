@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Bill;
+use App\Models\DebitNote;
+use App\Models\Setting;
 use App\Utility\Status;
 use Exception;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -185,7 +188,11 @@ class DebitNoteController extends Controller
             $view = "voyager::$slug.browse";
         }
 
+        $url = "browse";
+        $bill_prefix = Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
+
         return Voyager::view($view, compact(
+            'url',
             'actions',
             'dataType',
             'dataTypeContent',
@@ -200,7 +207,8 @@ class DebitNoteController extends Controller
             'defaultSearchKey',
             'usesSoftDeletes',
             'showSoftDeleted',
-            'showCheckboxColumn'
+            'showCheckboxColumn',
+            'bill_prefix'
         ));
     }
 
@@ -265,7 +273,11 @@ class DebitNoteController extends Controller
             $view = "voyager::$slug.read";
         }
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'isSoftDeleted'));
+        $url = "read";
+        $debit_note = DebitNote::with('bill')->find($id);
+        $bill_prefix = Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
+
+        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable', 'isSoftDeleted','debit_note','bill_prefix'));
     }
 
     //***************************************
@@ -323,9 +335,14 @@ class DebitNoteController extends Controller
 
         if (view()->exists("voyager::$slug.edit-add")) {
             $view = "voyager::$slug.edit-add";
-        }
+        }   
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        $url = 'edit';
+        $bills = Bill::get();
+        $debit_note = DebitNote::with('bill')->find($dataTypeContent->id);
+        $bill_prefix = Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
+
+        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable','bills','debit_note','bill_prefix'));
     }
 
     // POST BR(E)AD
@@ -426,8 +443,12 @@ class DebitNoteController extends Controller
         if (view()->exists("voyager::$slug.edit-add")) {
             $view = "voyager::$slug.edit-add";
         }
-
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable'));
+        $url = "create";
+        $bill_prefix = Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
+        $debit_note = DebitNote::with('bill')->find($dataTypeContent->id);
+        $bills = Bill::get();
+        
+        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable','bill_prefix','debit_note','bills'));
     }
 
     /**

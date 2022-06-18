@@ -1,19 +1,3 @@
-@php
-use App\Models\Vendor;
-use App\Models\Category;
-use App\Models\Bill;
-use App\Models\BillProduct;
-use App\Models\Setting;
-use App\Models\Product;
-use App\Utility\Formatting;
-
-$bill = Bill::find(Request::segment(3));
-$bill_products = BillProduct::where('bill_id',Request::segment(3))->get();
-$bill_prefix = Setting::where('key','system-setting.bill_prefix')->first()->value ?? '';
-$bill_payments = App\Models\BillPayment::where('bill_id',$bill->id)->get();
-$debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
-@endphp
-
 @extends('voyager::master')
 
 @section('page_title', __('voyager::generic.view').' '.$dataType->getTranslatedAttribute('display_name_singular'))
@@ -98,11 +82,11 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
                     <div class="row">
                         <div class="col-md-6">
                             <b> Issue Date </b><br>
-                            {{Formatting::date($bill->issue_date)}}
+                            {{App\Utility\Formatting::date($bill->issue_date)}}
                         </div>
                         <div class="col-md-6">
                             <b> Due Date </b><br>
-                            {{Formatting::date($bill->due_date)}}
+                            {{App\Utility\Formatting::date($bill->due_date)}}
                         </div>
                     </div>
                     <div class="row">
@@ -154,16 +138,16 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
                             {{$bill_product->quantity}}
                         </td>
                         <td>
-                            {{Formatting::price($bill_product->price)}}
+                            {{App\Utility\Formatting::price($bill_product->price)}}
                         </td>
                         <td>
                             {{$bill_product->tax}}
                         </td>
                         <td>
-                            {{Formatting::price($bill_product->discount)}}
+                            {{App\Utility\Formatting::price($bill_product->discount)}}
                         </td>
                         <td>
-                            {{Formatting::price($amount)}}
+                            {{App\Utility\Formatting::price($amount)}}
                             <input type="hidden" class="taxes" id="tax_total_{{$i}}" value="{{$tax[$i]}}">
                             <input type="hidden" class="subtotals" id="subtotal_{{$i}}" value="{{$subtotals[$i]}}">
                         </td>
@@ -181,42 +165,42 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
                         <td colspan="4"></td>
                         <td><b>Sub Total</b></td>
                         <td>
-                            {{Formatting::price(array_sum($subtotals))}}
+                            {{App\Utility\Formatting::price(array_sum($subtotals))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Discount</b></td>
                         <td>
-                            {{Formatting::price($bill_products->sum('discount'))}}
+                            {{App\Utility\Formatting::price($bill_products->sum('discount'))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Tax</b></td>
                         <td>
-                            {{Formatting::price(array_sum($tax))}}
+                            {{App\Utility\Formatting::price(array_sum($tax))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Paid</b></td>
                         <td>
-                            {{Formatting::price($bill_payments->sum('amount'))}}
+                            {{App\Utility\Formatting::price($bill_payments->sum('amount'))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Debit Note</b></td>
                         <td>
-                            {{Formatting::price($debit_notes->sum('amount'))}}
+                            {{App\Utility\Formatting::price($debit_notes->sum('amount'))}}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4"></td>
                         <td><b>Total Amount</b></td>
                         <td>
-                            {{Formatting::price(array_sum($amounts)-$debit_notes->sum('amount')-$bill_payments->sum('amount'))}}
+                            {{App\Utility\Formatting::price(array_sum($amounts)-$debit_notes->sum('amount')-$bill_payments->sum('amount'))}}
                         </td>
                     </tr>
                 </tbody>
@@ -251,8 +235,8 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
                                 <a href="{{url('storage/'.$receipt[0]->download_link)}}" download>{{$receipt[0]->original_name}}</a>
                             @endif
                         </td>
-                        <td>{{Formatting::date($bill_payment->date)}}</td>
-                        <td>{{Formatting::price($bill_payment->amount)}}</td>
+                        <td>{{App\Utility\Formatting::date($bill_payment->date)}}</td>
+                        <td>{{App\Utility\Formatting::price($bill_payment->amount)}}</td>
                         <td>{{$bill_payment->account->bank_name}}</td>
                         <td>{{$bill_payment->reference}}</td>
                         <td>{{$bill_payment->description}}</td>
@@ -280,8 +264,8 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
                 <tbody>
                     @foreach($debit_notes as $debit_note)
                     <tr>
-                        <td>{{Formatting::date($debit_note->date)}}</td>
-                        <td>{{Formatting::price($debit_note->amount)}}</td>
+                        <td>{{App\Utility\Formatting::date($debit_note->date)}}</td>
+                        <td>{{App\Utility\Formatting::price($debit_note->amount)}}</td>
                         <td>{{$debit_note->description}}</td>
                         <td>
                             <a href="{{url('admin/debit-notes/'.$debit_note->id.'/edit')}}" class="btn btn-sm btn-primary" target="_blank"><i class="voyager-edit"></i></a>

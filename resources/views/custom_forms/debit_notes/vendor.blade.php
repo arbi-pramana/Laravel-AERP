@@ -1,9 +1,3 @@
-@php
-$url = request()->segment(count(request()->segments()));
-$id = request()->segment(3);
-$debit_note = App\Models\DebitNote::with('vendor')->find($id);
-@endphp
-
 <div id="vendor_id">
 @if($url == "create")
 @elseif($url == "edit")
