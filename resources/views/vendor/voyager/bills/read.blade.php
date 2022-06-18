@@ -393,7 +393,7 @@ $debit_notes = App\Models\DebitNote::where('bill_id',$bill->id)->get();
 <script>
         function deletePayment(id){
             $("#delete_payment_modal").modal('show');
-            $("#delete_payment").attr('action', "{{url('admin/invoice-payments')}}"+"/"+id+"?bill_id="+'{{$bill->id}}');
+            $("#delete_payment").attr('action', "{{url('admin/bill-payments')}}"+"/"+id+"?bill_id="+'{{$bill->id}}');
         }
     </script>
 @stop
