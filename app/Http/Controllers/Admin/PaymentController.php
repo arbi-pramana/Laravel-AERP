@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\BankAccount;
 use App\Models\Category;
 use App\Utility\Transaction;
 use Exception;
@@ -333,8 +334,9 @@ class PaymentController extends Controller
 
         $url = "edit";
         $categories = Category::where('type',3)->get();
+        $bank_accounts = BankAccount::get();
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'categories', 'url'));
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'categories', 'url','bank_accounts'));
     }
 
     // POST BR(E)AD
@@ -452,8 +454,9 @@ class PaymentController extends Controller
 
         $url = "create";
         $categories = Category::where('type',3)->get();
+        $bank_accounts = BankAccount::get();
 
-        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'url','categories'));
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'url','categories','bank_accounts'));
     }
 
     /**
