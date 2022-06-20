@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\BankAccount;
 use App\Models\Category;
 use App\Utility\Transaction;
-use TCG\Voyager\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
@@ -18,9 +16,10 @@ use TCG\Voyager\Events\BreadDataRestored;
 use TCG\Voyager\Events\BreadDataUpdated;
 use TCG\Voyager\Events\BreadImagesDeleted;
 use TCG\Voyager\Facades\Voyager;
+use TCG\Voyager\Http\Controllers\Controller;
 use TCG\Voyager\Http\Controllers\Traits\BreadRelationshipParser;
 
-class RevenueController extends Controller
+class PaymentController extends Controller
 {
     use BreadRelationshipParser;
 
@@ -186,8 +185,9 @@ class RevenueController extends Controller
         if (view()->exists("voyager::$slug.browse")) {
             $view = "voyager::$slug.browse";
         }
-        
+
         $url = "browse";
+
         return Voyager::view($view, compact(
             'url',
             'actions',
@@ -332,9 +332,9 @@ class RevenueController extends Controller
         }
 
         $url = "edit";
-        $bank_accounts = BankAccount::get();
-        $categories = Category::where('type',2)->get();
-        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable','bank_accounts','categories'));
+        $categories = Category::where('type',3)->get();
+
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'categories', 'url'));
     }
 
     // POST BR(E)AD
@@ -371,12 +371,19 @@ class RevenueController extends Controller
             });
         $original_data = clone($data);
 
-        Transaction::destroyRevenueOrPayment($data->id,"Revenue");
+        $this->insertUpdateData($request, $slug, $dataType->editRows, $data);
+
+        // Delete Images
+        $this->deleteBreadImages($original_data, $to_remove);
+
+        event(new BreadDataUpdated($dataType, $data));
+
+        Transaction::destroyRevenueOrPayment($data->id,"Payment");
         $transaction_stores = [
-            "user_id" => $request->customer_id,
-            "user_type" => "Customer",
+            "user_id" => $request->vendor_id,
+            "user_type" => "Vendor",
             "account" => $request->account_id,
-            "type" => "Revenue",
+            "type" => "Payment",
             "amount" => $request->amount,
             "description" => $request->description,
             "date" => $request->date,
@@ -385,13 +392,6 @@ class RevenueController extends Controller
             "category" => Category::find($request->category_id)->name,
         ];
         Transaction::store($transaction_stores);
-
-        $this->insertUpdateData($request, $slug, $dataType->editRows, $data);
-
-        // Delete Images
-        $this->deleteBreadImages($original_data, $to_remove);
-
-        event(new BreadDataUpdated($dataType, $data));
 
         if (auth()->user()->can('browse', app($dataType->model_name))) {
             $redirect = redirect()->route("voyager.{$dataType->slug}.index");
@@ -451,10 +451,9 @@ class RevenueController extends Controller
         }
 
         $url = "create";
-        $bank_accounts = BankAccount::get();
-        $categories = Category::where('type',2)->get();
+        $categories = Category::where('type',3)->get();
 
-        return Voyager::view($view, compact('url','dataType', 'dataTypeContent', 'isModelTranslatable','bank_accounts','categories'));
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'url','categories'));
     }
 
     /**
@@ -480,10 +479,10 @@ class RevenueController extends Controller
         event(new BreadDataAdded($dataType, $data));
 
         $transaction_stores = [
-            "user_id" => $request->customer_id,
-            "user_type" => "Customer",
+            "user_id" => $request->vendor_id,
+            "user_type" => "Vendor",
             "account" => $request->account_id,
-            "type" => "Revenue",
+            "type" => "Payment",
             "amount" => $request->amount,
             "description" => $request->description,
             "date" => $request->date,
@@ -565,7 +564,7 @@ class RevenueController extends Controller
             event(new BreadDataDeleted($dataType, $data));
         }
 
-        Transaction::destroyRevenueOrPayment($id,"Revenue");
+        Transaction::destroyRevenueOrPayment($id,"Payment");
 
         return redirect()->route("voyager.{$dataType->slug}.index")->with($data);
     }

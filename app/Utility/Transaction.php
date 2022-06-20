@@ -27,4 +27,11 @@ class Transaction{
             ->where('category',$category)
             ->delete();
     }
+
+    public function destroyRevenueOrPayment($id,$type)
+    {
+        ModelsTransaction::where('payment_id',$id)
+            ->where('type',$type)
+            ->delete();
+    }
 }
