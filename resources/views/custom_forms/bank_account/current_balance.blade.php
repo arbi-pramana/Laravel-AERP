@@ -9,3 +9,9 @@
         {{App\Models\BankAccount::current_balance($dataTypeContent->id)}}
     @endif
 @endif
+
+<script>
+    if(document.getElementById("current_balance") != null){
+        document.getElementById("current_balance").getElementsByTagName("label")[0].innerHTML = "Opening Balance" 
+    }
+</script>
