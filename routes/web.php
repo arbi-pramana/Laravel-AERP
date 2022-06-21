@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ChartOfAccountController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\JournalEntryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,6 +37,9 @@ Route::group(['prefix' => 'admin'], function () {
     Route::put('bills/{id}/update',BillController::class.'@update');
     Route::get('bills/{id}/update-status',BillController::class.'@updateStatus');
     Route::delete('bills/{id}/debit-note',BillController::class.'@destroyDebitNote');
+    Route::group(['prefix'=>'report'],function(){
+        Route::get('ledger',ReportController::class.'@ledger');
+    });
     Voyager::routes();
     Route::delete('invoices/{id}',InvoiceController::class.'@destroy')->name('voyager.invoices.destroy');
     Route::delete('bills/{id}',BillController::class.'@destroy')->name('voyager.bills.destroy');
