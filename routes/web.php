@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BillController;
 use App\Http\Controllers\Admin\ChartOfAccountController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\JournalEntryController;
 use App\Http\Controllers\Admin\ProductController;
 use Illuminate\Support\Facades\Route;
 
