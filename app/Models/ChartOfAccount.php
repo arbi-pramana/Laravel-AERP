@@ -18,4 +18,9 @@ class ChartOfAccount extends Model
     {
         return $this->belongsTo(ChartOfAccountSubType::class,"sub_type","id");
     }
+
+    public function journals()
+    {
+        return $this->hasMany(JournalItem::class,"account","id");
+    }
 }

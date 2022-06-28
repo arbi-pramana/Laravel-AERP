@@ -32,4 +32,10 @@ class ReportController extends Controller
         $data['accounts'] = ChartOfAccount::get();
         return view('vendor.voyager.report.ledger',$data);
     }
+
+    public function balanceSheet(Request $request)
+    {
+        $data['chart_of_accounts'] = ChartOfAccount::with('journals')->get();
+        return view('vendor.voyager.report.balance-sheet',$data);
+    }
 }

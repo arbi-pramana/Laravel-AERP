@@ -39,6 +39,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::delete('bills/{id}/debit-note',BillController::class.'@destroyDebitNote');
     Route::group(['prefix'=>'report'],function(){
         Route::get('ledger',ReportController::class.'@ledger');
+        Route::get('balance-sheet',ReportController::class.'@balanceSheet');
     });
     Voyager::routes();
     Route::delete('invoices/{id}',InvoiceController::class.'@destroy')->name('voyager.invoices.destroy');
