@@ -133,7 +133,7 @@
                             @if(!empty($journal_items))
                                 @foreach($journal_items as $journal_item)
                                     <tr>
-                                        <td>{{setting('system-setting.journal_prefix').str_pad($journal_item->id,5,STR_PAD_LEFT)}}</td>
+                                        <td>{{setting('system-setting.journal_prefix').str_pad($journal_item->journal_id,5,0,STR_PAD_LEFT)}}</td>
                                         <td>{{$journal_item->date}}</td>
                                         <td>{{$journal_item->created_at}}</td>
                                         <td>{{$journal_item->descriptions}}</td>

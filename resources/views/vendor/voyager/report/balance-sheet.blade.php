@@ -11,7 +11,6 @@
     </h1>
 @stop
 
-
 @section('content')
 <div class="page-content edit-add container-fluid">
     <div class="card">
@@ -62,52 +61,32 @@
     </div>
     <br>
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <b>Total Assets :</b> <br>
-                    <b> - </b>
+        @foreach($chart_of_accounts->groupBy('type') as $chart_of_account)
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <b>Total {{$chart_of_account[0]->ChartOfAccountType->name}} :</b> <br>
+                        @php
+                            $totals = []
+                        @endphp
+                        @foreach($chart_of_account as $account)
+                            @php
+                                $totals[] =+ App\Utility\ChartOfAccount::totalValue(request('start_date'),request('end_date'),$account->id)
+                            @endphp
+                        @endforeach
+                        <b> {{App\Utility\ChartOfAccount::totalAccounts(array_sum($totals))}} </b>
+                    </div>
                 </div>
             </div>
-            <br>
-            <div class="card">
-                <div class="card-body">
-                    <b>Total Liablities :</b> <br>
-                    <b> - </b>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <b>Total Expenses :</b> <br>
-                    <b> - </b>
-                </div>
-            </div>
-            <br>
-            <div class="card">
-                <div class="card-body">
-                    <b>Total Income :</b> <br>
-                    <b> - </b>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <b>Total Equity :</b> <br>
-                    <b> - </b>
-                </div>
-            </div>
-        </div>
+        @endforeach
     </div>
     @foreach($chart_of_accounts->groupBy('type') as $chart_of_account)
         <div class="row">
             <div class="col-md-12">
-                <h3>{{$chart_of_account[0]->ChartOfAccountType->name}}</h3> <br>
+                <h3>{{$chart_of_account[0]->ChartOfAccountType->name}}</h3>
             </div>
             @foreach($chart_of_account->groupBy('sub_type') as $accounts)
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="card">
                         <div class="card-body">
                             <h4>{{$accounts[0]->ChartOfAccountSubType->name}}</h4> <br>
@@ -117,15 +96,21 @@
                                     <th>Amount</th>
                                 </thead>
                                 <tbody>
+                                    @php
+                                        $totals = []
+                                    @endphp
                                     @foreach($accounts as $account)
-                                    <tr>
-                                        <td>{{$account->name}}</td>
-                                        <td>{{$account->journals}}</td>
-                                    </tr>
+                                        @php
+                                            $totals[] =+ App\Utility\ChartOfAccount::totalValue(request('start_date'),request('end_date'),$account->id)
+                                        @endphp
+                                        <tr>
+                                            <td>{{$account->name}}</td>
+                                            <td>{{App\Utility\ChartOfAccount::balanceSheetValue(request('start_date'),request('end_date'),$account->id)}}</td>
+                                        </tr>
                                     @endforeach
                                     <tr>
                                         <td><b>Total {{$accounts[0]->ChartOfAccountSubType->name}}</b></td>
-                                        <td></td>
+                                        <td>{{App\Utility\ChartOfAccount::totalAccounts(array_sum($totals))}}</td>
                                     </tr>
                                 </tbody>
                             </table>
