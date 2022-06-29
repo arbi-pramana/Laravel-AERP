@@ -38,4 +38,10 @@ class ReportController extends Controller
         $data['chart_of_accounts'] = ChartOfAccount::with('journals')->get();
         return view('vendor.voyager.report.balance-sheet',$data);
     }
+
+    public function trialBalance(Request $request)
+    {
+        $data = [];
+        return view('vendor.voyager.report.trial-balance',$data);
+    }
 }

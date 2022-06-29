@@ -3,7 +3,7 @@
 @section('css')
 @stop
 
-@section('page_title',"")
+@section('page_title',"Ledger Summary Report")
 
 @section('page_header')
     <h1 class="page-title">

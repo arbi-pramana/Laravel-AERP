@@ -40,6 +40,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::group(['prefix'=>'report'],function(){
         Route::get('ledger',ReportController::class.'@ledger');
         Route::get('balance-sheet',ReportController::class.'@balanceSheet');
+        Route::get('trial-balance',ReportController::class.'@trialBalance');
     });
     Voyager::routes();
     Route::delete('invoices/{id}',InvoiceController::class.'@destroy')->name('voyager.invoices.destroy');
